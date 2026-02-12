@@ -1,0 +1,59 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/smartledger?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
+    username: root  # MySQL用户名
+    password: 1128lxlLXL@  # MySQL密码
+  mvc:
+    format:
+      date: dd/MM/yyyy
+      datetime: yyyy-MM-dd HH:mm:ss
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+      resolve-lazily: true
+    encoding:
+      charset: utf-8
+      force: true
+      enabled: true
+  mail:
+    host: smtp.qq.com
+    username: 2055346449@qq.com
+    password: ztomwtlilxbodaab
+    protocol: smtp
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          timeout: 5000  # 邮件发送超时时间（5秒）
+  web:
+    # 补充：跨域配置（前端调用接口必加，否则会报跨域错误）
+    cors:
+      allowed-origin-patterns: "*"  # 允许所有前端域名（开发环境推荐，生产可指定具体域名）
+      allowed-methods: GET,POST,PUT,DELETE,OPTIONS  # 允许的请求方式
+      allowed-headers: "*"          # 允许所有请求头
+      allow-credentials: true       # 允许携带Cookie（如登录凭证）
+      max-age: 3600                 # 预检请求缓存时间（1小时，减少请求次数）
+    resources:
+      static-locations: classpath:/META-INF/resources/, classpath:/resources/, classpath:/static/, classpath:/public/, file:./file/ # 静态资源路径（前端页面、上传的文件等）
+server:
+  port: 8081
+
+mybatis:
+  mapper-locations: classpath:/mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+logging:
+  level:
+    lu.smartledger.mapper: debug  # Mapper包下日志级别为debug（打印SQL）
+    root: info  # 全局日志级别为info（避免日志过多）
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"  # 日志格式
+file:
+  upload-path: D:/GraduationProject/SmartLedger/uploads
