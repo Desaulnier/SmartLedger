@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="lu.smartledger.mapper.UserStatisticsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="lu.smartledger.model.domain.UserStatistics">
+        <id column="id" property="id" />
+        <result column="user_id" property="userId" />
+        <result column="stat_month" property="statMonth" />
+        <result column="total_income" property="totalIncome" />
+        <result column="total_expense" property="totalExpense" />
+        <result column="updated_at" property="updatedAt" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, user_id, stat_month, total_income, total_expense, updated_at
+    </sql>
+
+</mapper>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="lu.smartledger.mapper.BillsMapper">
+
+    <!-- Bills 完整映射结果 -->
+    <resultMap id="BillsResultMap" type="lu.smartledger.model.domain.Bills">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="amount" property="amount"/>
+        <result column="bill_type" property="billType"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="occur_time" property="occurTime"/>
+        <result column="source" property="source"/>
+        <result column="import_record_id" property="importRecordId"/>
+        <result column="remark" property="remark"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <!-- Bills 基础映射（用于列表查询） -->
+    <resultMap id="BillsBaseResultMap" type="lu.smartledger.model.domain.Bills">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="amount" property="amount"/>
+        <result column="bill_type" property="billType"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="occur_time" property="occurTime"/>
+        <result column="source" property="source"/>
+        <result column="remark" property="remark"/>
+    </resultMap>
+
+
+</mapper>

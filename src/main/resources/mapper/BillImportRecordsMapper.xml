@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="lu.smartledger.mapper.BillImportRecordsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="lu.smartledger.model.domain.BillImportRecords">
+        <id column="id" property="id" />
+        <result column="user_id" property="userId" />
+        <result column="file_name" property="fileName" />
+        <result column="file_type" property="fileType" />
+        <result column="total_count" property="totalCount" />
+        <result column="success_count" property="successCount" />
+        <result column="fail_reason" property="failReason" />
+        <result column="import_time" property="importTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, user_id, file_name, file_type, total_count, success_count, fail_reason, import_time
+    </sql>
+
+</mapper>

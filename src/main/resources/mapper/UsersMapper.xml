@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="lu.smartledger.mapper.UsersMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="lu.smartledger.model.domain.Users">
+        <id column="id" property="id"/>
+        <result column="email" property="email"/>
+        <result column="password" property="password"/>
+        <result column="username" property="username"/>
+        <result column="phone" property="phone"/>
+        <result column="avatar_url" property="avatarUrl"/>
+        <result column="role" property="role"/>
+        <result column="status" property="status"/>
+        <result column="is_warning_enabled" property="isWarningEnabled"/>
+        <result column="monthly_limit" property="monthlyLimit"/>
+        <result column="warning_threshold" property="warningThreshold"/>
+        <result column="current_spent" property="currentSpent"/>
+        <result column="limit_month" property="limitMonth"/>
+        <result column="last_login" property="lastLogin"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <!-- 通用查询字段 -->
+    <sql id="Base_Column_List">
+        id, email, password, username, phone, avatar_url, role, status,
+        is_warning_enabled, monthly_limit, warning_threshold, current_spent,
+        limit_month, last_login, created_at, updated_at
+    </sql>
+
+    <!-- 根据邮箱查询用户（不返回密码敏感信息） -->
+    <select id="selectByEmail" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM users
+        WHERE email = #{email}
+    </select>
+
+    <!-- 根据角色查询用户列表 -->
+    <select id="selectByRole" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM users
+        WHERE role = #{role}
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 更新用户状态 -->
+    <update id="updateStatus">
+        UPDATE users
+        SET status = #{status},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 更新最后登录时间 -->
+    <update id="updateLastLogin">
+        UPDATE users
+        SET last_login = NOW(),
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+</mapper>

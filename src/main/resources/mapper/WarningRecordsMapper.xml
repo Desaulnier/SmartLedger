@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="lu.smartledger.mapper.WarningRecordsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="lu.smartledger.model.domain.WarningRecords">
+        <id column="id" property="id" />
+        <result column="user_id" property="userId" />
+        <result column="warning_type" property="warningType" />
+        <result column="trigger_amount" property="triggerAmount" />
+        <result column="warning_msg" property="warningMsg" />
+        <result column="is_read" property="isRead" />
+        <result column="created_at" property="createdAt" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, user_id, warning_type, trigger_amount, warning_msg, is_read, created_at
+    </sql>
+
+</mapper>
