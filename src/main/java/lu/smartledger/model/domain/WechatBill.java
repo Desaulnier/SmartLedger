@@ -38,17 +38,17 @@ public class WechatBill {
 
     public Bills toBills(){
         Bills bills = new Bills();
-        
+
         if(tradeTime != null && !tradeTime.isEmpty()){
             try {
                 LocalDateTime dateTime = LocalDateTime.parse(tradeTime,
                         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                bills.setBillDate(java.sql.Timestamp.valueOf(dateTime));
+                bills.setOccurTime(dateTime);
             } catch (Exception e) {
-                bills.setBillDate(new java.sql.Timestamp(System.currentTimeMillis()));
+                bills.setOccurTime(LocalDateTime.now());
             }
         }
-        
+
         if(amountStr != null && !amountStr.isEmpty()){
             try {
                 String cleanAmount = amountStr.replaceAll("[^0-9.\\-]", "");
@@ -66,7 +66,7 @@ public class WechatBill {
         } else if("收入".equals(incomeExpense)) {
             bills.setBillType("INCOME");
         }
-        
+
         String remark = goodsDesc;
         if(tradePartner != null && !tradePartner.isEmpty()) {
             String goods = (goodsDesc != null && !goodsDesc.equals("/") && !goodsDesc.isEmpty()) ? goodsDesc : "";
@@ -77,7 +77,6 @@ public class WechatBill {
         bills.setCreatedAt(LocalDateTime.now());
         bills.setUpdatedAt(LocalDateTime.now());
 
-        // 新增：如果没有金额，返回 null，跳过这条数据
         if(bills.getAmount() == null) {
             return null;
         }

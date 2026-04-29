@@ -31,6 +31,12 @@ spring:
             enable: true
             required: true
           timeout: 5000  # 邮件发送超时时间（5秒）
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+      timeout: 5000
   web:
     # 补充：跨域配置（前端调用接口必加，否则会报跨域错误）
     cors:
