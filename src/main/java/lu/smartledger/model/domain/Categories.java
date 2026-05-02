@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -21,9 +22,7 @@ import java.time.LocalDateTime;
  * @author lu
  * @since 2026-04-11
  */
-@Getter
-@Setter
-@ToString
+@Data
 @Accessors(chain = true)
 @TableName("categories")
 @Schema(description = "消费分类表")

@@ -7,6 +7,7 @@ import lu.smartledger.common.utls.JwtUtils;
 import lu.smartledger.mapper.UsersMapper;
 import lu.smartledger.model.domain.RegisterRequest;
 import lu.smartledger.model.domain.Users;
+import lu.smartledger.model.dto.ChangePasswordRequest;
 import lu.smartledger.model.dto.ProfileUpdateRequest;
 import lu.smartledger.model.dto.ResetPasswordRequest;
 import lu.smartledger.service.UsersService;
@@ -16,10 +17,14 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.concurrent.TimeUnit;
 
@@ -244,6 +249,54 @@ public class UsersController {
             return JsonResponse.fail("个人资料更新失败");
         } catch (RuntimeException e) {
             return JsonResponse.fail(e.getMessage());
+        }
+    }
+
+    @PutMapping("/password")
+    public JsonResponse changePassword(@RequestBody ChangePasswordRequest request) {
+        try {
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            boolean success = usersService.changeCurrentUserPassword(email, request);
+            if (success) {
+                return JsonResponse.success("密码修改成功");
+            }
+            return JsonResponse.fail("密码修改失败");
+        } catch (RuntimeException e) {
+            return JsonResponse.fail(e.getMessage());
+        }
+    }
+
+    @PostMapping("/avatar")
+    public JsonResponse uploadAvatar(@RequestParam("file") MultipartFile file) {
+        try {
+            if (file == null || file.isEmpty()) {
+                return JsonResponse.fail("上传文件不能为空");
+            }
+
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                return JsonResponse.fail("只能上传图片文件");
+            }
+
+            File avatarDir = new File("file/avatar");
+            if (!avatarDir.exists() && !avatarDir.mkdirs()) {
+                return JsonResponse.fail("头像目录创建失败");
+            }
+
+            String originalFilename = file.getOriginalFilename();
+            String suffix = ".png";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+
+            String fileName = "avatar_" + UUID.randomUUID().toString().replace("-", "") + suffix;
+            File targetFile = new File(avatarDir, fileName);
+            file.transferTo(targetFile);
+
+            return JsonResponse.success("头像上传成功", "/avatar/" + fileName);
+        } catch (IOException e) {
+            log.error("头像上传失败", e);
+            return JsonResponse.fail("头像上传失败：" + e.getMessage());
         }
     }
 

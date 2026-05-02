@@ -35,7 +35,8 @@ public class SecurityConfig {
                                 "/users/register",
                                 "/users/send-code",
                                 "/users/send-reset-code",
-                                "/users/reset-password"
+                                "/users/reset-password",
+                                "/accounts/**"
                         ).permitAll()
 
                         .anyRequest().authenticated()
@@ -56,7 +57,7 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

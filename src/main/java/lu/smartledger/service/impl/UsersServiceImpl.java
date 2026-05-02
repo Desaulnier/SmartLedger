@@ -7,10 +7,13 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
 import lu.smartledger.common.utls.JsonResponse;
 import lu.smartledger.mapper.UsersMapper;
+import lu.smartledger.model.domain.Accounts;
 import lu.smartledger.model.domain.RegisterRequest;
 import lu.smartledger.model.domain.Users;
+import lu.smartledger.model.dto.ChangePasswordRequest;
 import lu.smartledger.model.dto.ProfileUpdateRequest;
 import lu.smartledger.model.dto.ResetPasswordRequest;
+import lu.smartledger.service.IAccountsService;
 import lu.smartledger.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -30,6 +33,8 @@ public class UsersServiceImpl implements UsersService {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private IAccountsService accountsService;
     @Override
     public Users geByEmail(String email) {//查询用户
         return usersMapper.selectOne(new QueryWrapper<Users>().eq("email", email));
@@ -85,7 +90,7 @@ public class UsersServiceImpl implements UsersService {
         user.setUsername(request.getUsername().trim());
         user.setEmail(email);
         user.setPhone(request.getPhone().trim());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));//密码加密
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole("USER");
         user.setStatus("ACTIVE");
         user.setIsWarningEnabled(true);
@@ -102,6 +107,18 @@ public class UsersServiceImpl implements UsersService {
             throw new RuntimeException("用户保存失败");
         }
 
+        Accounts defaultAccount = new Accounts();
+        defaultAccount.setUserId(user.getId());
+        defaultAccount.setAccountName("默认账本");
+        defaultAccount.setAccountType((byte) 5);
+        defaultAccount.setBalance(BigDecimal.ZERO);
+        defaultAccount.setIsDefault((byte) 1);
+        defaultAccount.setIsDeleted((byte) 0);
+        defaultAccount.setCreateTime(LocalDateTime.now());
+        defaultAccount.setUpdateTime(LocalDateTime.now());
+
+        accountsService.save(defaultAccount);
+
         stringRedisTemplate.delete(redisKey);
         return true;
     }
@@ -117,7 +134,32 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public Page<Users> getAdminUserList(Integer pageNum, Integer pageSize, String status, String role, String keyword) {
-        return null;
+        // 防止分页参数为null
+        pageNum = pageNum == null ? 1 : pageNum;
+        pageSize = pageSize == null ? 10 : pageSize;
+
+        Page<Users> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<Users> wrapper = new LambdaQueryWrapper<>();
+
+        // 按状态筛选
+        if (status != null && !status.isEmpty()) {
+            wrapper.eq(Users::getStatus, status);
+        }
+
+        // 按角色筛选
+        if (role != null && !role.isEmpty()) {
+            wrapper.eq(Users::getRole, role);
+        }
+
+        // 按关键词搜索（用户名或邮箱）
+        if (keyword != null && !keyword.isEmpty()) {
+            wrapper.and(w -> w.like(Users::getUsername, keyword).or().like(Users::getEmail, keyword));
+        }
+
+        // 按创建时间倒序
+        wrapper.orderByDesc(Users::getCreatedAt);
+
+        return usersMapper.selectPage(page, wrapper);
     }
 
     /**
@@ -198,4 +240,33 @@ public class UsersServiceImpl implements UsersService {
         return usersMapper.updateById(user) > 0;
     }
 
+    @Override
+    public boolean changeCurrentUserPassword(String email, ChangePasswordRequest request) {
+        Users user = usersMapper.selectOne(new QueryWrapper<Users>().eq("email", email));
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        if (request.getOldPassword() == null || request.getOldPassword().trim().isEmpty()) {
+            throw new RuntimeException("旧密码不能为空");
+        }
+        if (request.getNewPassword() == null || request.getNewPassword().trim().isEmpty()) {
+            throw new RuntimeException("新密码不能为空");
+        }
+        if (request.getConfirmPassword() == null || request.getConfirmPassword().trim().isEmpty()) {
+            throw new RuntimeException("确认密码不能为空");
+        }
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new RuntimeException("两次输入的新密码不一致");
+        }
+        if (request.getNewPassword().length() < 6 || request.getNewPassword().length() > 20) {
+            throw new RuntimeException("新密码长度需在 6 到 20 位之间");
+        }
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new RuntimeException("旧密码不正确");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword().trim()));
+        user.setUpdatedAt(LocalDateTime.now());
+        return usersMapper.updateById(user) > 0;
+    }
 }

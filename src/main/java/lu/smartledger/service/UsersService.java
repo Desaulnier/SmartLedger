@@ -3,6 +3,7 @@ package lu.smartledger.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lu.smartledger.model.domain.RegisterRequest;
 import lu.smartledger.model.domain.Users;
+import lu.smartledger.model.dto.ChangePasswordRequest;
 import lu.smartledger.model.dto.ProfileUpdateRequest;
 import lu.smartledger.model.dto.ResetPasswordRequest;
 
@@ -24,4 +25,5 @@ public interface UsersService {
     boolean resetPassword(ResetPasswordRequest request);
     Users getCurrentUserProfile(String email);
     boolean updateCurrentUserProfile(String email, ProfileUpdateRequest request);
+    boolean changeCurrentUserPassword(String email, ChangePasswordRequest request);
 }
