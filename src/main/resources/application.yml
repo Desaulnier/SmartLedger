@@ -46,9 +46,9 @@ spring:
       allow-credentials: true       # 允许携带Cookie（如登录凭证）
       max-age: 3600                 # 预检请求缓存时间（1小时，减少请求次数）
     resources:
-      static-locations: classpath:/META-INF/resources/, classpath:/resources/, classpath:/static/, classpath:/public/, file:./file/ # 静态资源路径（前端页面、上传的文件等）
+      static-locations: classpath:/META-INF/resources/, classpath:/resources/, classpath:/static/, classpath:/public/, file:D:/Graduation Project/SmartLedger/file/
 server:
-  port: 8081
+  port: 8082
 
 mybatis-plus:
   mapper-locations: classpath:/mapper/*.xml

@@ -11,11 +11,12 @@
         <result column="warning_msg" property="warningMsg" />
         <result column="is_read" property="isRead" />
         <result column="created_at" property="createdAt" />
+        <result column="threshold_snapshot" property="thresholdSnapshot" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, user_id, warning_type, trigger_amount, warning_msg, is_read, created_at
+        id, user_id, warning_type, trigger_amount, warning_msg, is_read, created_at, threshold_snapshot
     </sql>
 
 </mapper>

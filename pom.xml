@@ -131,11 +131,6 @@
             <artifactId>smile-core</artifactId>
             <version>3.1.1</version>
         </dependency>
-        <!-- 邮箱 -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-mail</artifactId>
-        </dependency>
 
         <!-- Redis 存验证码 -->
         <dependency>

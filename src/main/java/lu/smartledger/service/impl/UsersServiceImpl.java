@@ -101,6 +101,11 @@ public class UsersServiceImpl implements UsersService {
         user.setEmergencyFund(BigDecimal.ZERO);
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
+        user.setMonthlyAllowance(BigDecimal.ZERO);
+        user.setMonthlyLimit(BigDecimal.ZERO);
+        user.setDailySurvivalCost(BigDecimal.ZERO);
+        user.setWeeklyBudget(BigDecimal.ZERO);
+        user.setEmergencyFund(BigDecimal.ZERO);
 
         int rows = usersMapper.insert(user);
         if (rows <= 0) {

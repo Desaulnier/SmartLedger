@@ -10,12 +10,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
-public class JwtUtils {// JWT工具类
-    private static final String SECRET_STR = "your-very-secure-and-ultra-long-secret-key-for-smartledger";// 密钥
+public class JwtUtils {
+    private static final String SECRET_STR = "your-very-secure-and-ultra-long-secret-key-for-smartledger";
     private static final SecretKey KEY = Keys.hmacShaKeyFor(SECRET_STR.getBytes(StandardCharsets.UTF_8));
 
-    private static final long EXPIRE = 3600000; // 1小时
-    //生成JWT
+    private static final long EXPIRE = 7 * 24 * 3600 * 1000; // 7天
+
     public String createToken(String email, String role) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + EXPIRE);
@@ -25,10 +25,10 @@ public class JwtUtils {// JWT工具类
                 .claim("role", role)
                 .issuedAt(now)
                 .expiration(expiryDate)
-                .signWith(KEY) // 自动识别 HS256 算法
+                .signWith(KEY)
                 .compact();
     }
-    //解析
+
     public Claims parseToken(String token) {
         return Jwts.parser()
                 .verifyWith(KEY)

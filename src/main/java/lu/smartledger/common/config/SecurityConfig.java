@@ -19,16 +19,15 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 启用CORS并指定配置源
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
-                // 配置放行路径（Vite代理已去掉/api，实际请求是/users/login）
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/users/login",
@@ -36,13 +35,14 @@ public class SecurityConfig {
                                 "/users/send-code",
                                 "/users/send-reset-code",
                                 "/users/reset-password",
-                                "/accounts/**"
+                                "/file/**",
+                                "/users/avatar"
                         ).permitAll()
-
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
-                //  禁用默认表单和 Basic 验证
+                .addFilterBefore(jwtAuthenticationFilter,
+                        org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);
 
@@ -63,12 +63,8 @@ public class SecurityConfig {
         return source;
     }
 
-    /**
-     * 密码加密接口
-     * @return
-     */
     @Bean
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();// 使用BCrypt密码加密
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

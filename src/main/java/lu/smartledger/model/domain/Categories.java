@@ -66,13 +66,6 @@ public class Categories implements Serializable {
     private LocalDateTime createdAt;
 
     /**
-     * 默认消费属性：1=必需, 2=改善, 3=欲望
-     */
-    @TableField("default_attribute")
-    @Schema(defaultValue = "默认消费属性：1=必需, 2=改善, 3=欲望")
-    private Byte defaultAttribute;
-
-    /**
      * 默认消费维度：1=生存必需, 2=生活改善, 3=欲望消费
      */
     @TableField("default_type")
