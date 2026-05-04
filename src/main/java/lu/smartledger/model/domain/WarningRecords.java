@@ -77,4 +77,11 @@ public class WarningRecords implements Serializable {
     @TableField("created_at")
     @Schema(defaultValue = "预警触发时间")
     private LocalDateTime createdAt;
+
+    /**
+     * 阈值快照
+     */
+    @TableField("threshold_snapshot")
+    @Schema(defaultValue = "阈值快照")
+    private BigDecimal thresholdSnapshot;
 }

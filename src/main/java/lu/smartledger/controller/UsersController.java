@@ -278,9 +278,10 @@ public class UsersController {
                 return JsonResponse.fail("只能上传图片文件");
             }
 
-            File avatarDir = new File("file/avatar");
-            if (!avatarDir.exists() && !avatarDir.mkdirs()) {
-                return JsonResponse.fail("头像目录创建失败");
+            // 固定D盘目录 + 自动判断创建
+            File avatarDir = new File("D:/Graduation Project/SmartLedger/file/avatar");
+            if (!avatarDir.exists()) {
+                avatarDir.mkdirs();
             }
 
             String originalFilename = file.getOriginalFilename();
@@ -293,12 +294,11 @@ public class UsersController {
             File targetFile = new File(avatarDir, fileName);
             file.transferTo(targetFile);
 
-            return JsonResponse.success("头像上传成功", "/avatar/" + fileName);
+            // 直接返回完整后端地址，前端不会404！
+            return JsonResponse.success("头像上传成功", "http://localhost:8081/file/avatar/" + fileName);
         } catch (IOException e) {
             log.error("头像上传失败", e);
             return JsonResponse.fail("头像上传失败：" + e.getMessage());
         }
     }
-
-
 }

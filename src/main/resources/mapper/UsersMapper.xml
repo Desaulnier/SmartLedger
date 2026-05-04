@@ -4,30 +4,36 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="lu.smartledger.model.domain.Users">
-        <id column="id" property="id"/>
-        <result column="email" property="email"/>
-        <result column="password" property="password"/>
-        <result column="username" property="username"/>
-        <result column="phone" property="phone"/>
-        <result column="avatar_url" property="avatarUrl"/>
-        <result column="role" property="role"/>
-        <result column="status" property="status"/>
-        <result column="is_warning_enabled" property="isWarningEnabled"/>
-        <result column="monthly_limit" property="monthlyLimit"/>
-        <result column="warning_threshold" property="warningThreshold"/>
-        <result column="current_spent" property="currentSpent"/>
-        <result column="limit_month" property="limitMonth"/>
-        <result column="last_login" property="lastLogin"/>
-        <result column="created_at" property="createdAt"/>
-        <result column="updated_at" property="updatedAt"/>
-    </resultMap>
+    <id column="id" property="id"/>
+    <result column="email" property="email"/>
+    <result column="password" property="password"/>
+    <result column="username" property="username"/>
+    <result column="phone" property="phone"/>
+    <result column="avatar_url" property="avatarUrl"/>
+    <result column="role" property="role"/>
+    <result column="status" property="status"/>
+    <result column="is_warning_enabled" property="isWarningEnabled"/>
+    <result column="monthly_allowance" property="monthlyAllowance"/>
+    <result column="monthly_limit" property="monthlyLimit"/>
+    <result column="daily_survival_cost" property="dailySurvivalCost"/>
+    <result column="warning_threshold" property="warningThreshold"/>
+    <result column="current_spent" property="currentSpent"/>
+    <result column="limit_month" property="limitMonth"/>
+    <result column="last_login" property="lastLogin"/>
+    <result column="created_at" property="createdAt"/>
+    <result column="updated_at" property="updatedAt"/>
+    <result column="weekly_budget" property="weeklyBudget"/>
+    <result column="emergency_fund" property="emergencyFund"/>
+</resultMap>
 
-    <!-- 通用查询字段 -->
-    <sql id="Base_Column_List">
-        id, email, password, username, phone, avatar_url, role, status,
-        is_warning_enabled, monthly_limit, warning_threshold, current_spent,
-        limit_month, last_login, created_at, updated_at
-    </sql>
+<sql id="Base_Column_List">
+    id, email, password, username, phone, avatar_url, role, status,
+    is_warning_enabled, monthly_allowance, monthly_limit, daily_survival_cost,
+    warning_threshold, current_spent, limit_month, last_login, created_at, updated_at,
+    weekly_budget, emergency_fund
+</sql>
+
+
 
     <!-- 根据邮箱查询用户（不返回密码敏感信息） -->
     <select id="selectByEmail" resultMap="BaseResultMap">

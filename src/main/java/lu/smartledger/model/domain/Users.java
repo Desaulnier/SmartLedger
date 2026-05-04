@@ -48,28 +48,37 @@ public class Users implements Serializable {
 
     @Schema(description = "是否启用超前消费预警")
     private Boolean isWarningEnabled;
-    @Schema(description = "月度消费限额")
+
+    @Schema(description = "月生活费")
+    private BigDecimal monthlyAllowance;
+
+    @Schema(description = "月度预算")
     private BigDecimal monthlyLimit;
+
+    @Schema(description = "每日生存保障")
+    private BigDecimal dailySurvivalCost;
+
     @Schema(description = "预警阈值比例")
     private BigDecimal warningThreshold;
 
     @Schema(description = "当月已消费金额")
     private BigDecimal currentSpent;
+
     @Schema(description = "限额所属月份")
     private String limitMonth;
 
-    @Schema(description = "最后登录时间")
-    private LocalDateTime lastLogin;
+    @Schema(description = "周预算")
+    private BigDecimal weeklyBudget;
+
+    @Schema(description = "应急资金")
+    private BigDecimal emergencyFund;
+
     @Schema(description = "创建时间")
     private LocalDateTime createdAt;
+
     @Schema(description = "更新时间")
     private LocalDateTime updatedAt;
 
-    @Schema(description = "周预算")
-    private BigDecimal weeklyBudget; // 周预算
-
-    @Schema(description = "应急资金")
-    private BigDecimal emergencyFund; // 应急资金
 
     public Users(){}//调用接口时先创造这样一个对象方便输入数据
 }
