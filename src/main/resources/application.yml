@@ -3,7 +3,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/smartledger?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
     username: root  # MySQL用户名
-    password: 1128lxlLXL@  # MySQL密码
+    password:   # MySQL密码
   mvc:
     format:
       date: dd/MM/yyyy
@@ -20,7 +20,7 @@ spring:
   mail:
     host: smtp.qq.com
     username: 2055346449@qq.com
-    password: ztomwtlilxbodaab
+    password:  # 邮箱授权码
     protocol: smtp
     port: 587
     properties:

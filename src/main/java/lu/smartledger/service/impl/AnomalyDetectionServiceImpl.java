@@ -36,15 +36,15 @@ public class AnomalyDetectionServiceImpl implements AnomalyDetectionService {
             return;
         }
         try {
-            double[][] train = buildFeatureMatrix(validHistory);
-            double[] current = buildFeatures(bill);
-            IsolationForest forest = IsolationForest.fit(train);
-            double rawScore = forest.score(current);
-            double[] historyScores = forest.score(train);
-            double normalizedScore = normalizeScore(rawScore, historyScores);
-            String anomalyType = resolveAnomalyType(bill, validHistory, normalizedScore);
-            String anomalyReason = buildReason(bill, validHistory, normalizedScore, anomalyType);
-            bill.setAnomalyScore(BigDecimal.valueOf(normalizedScore).setScale(4, RoundingMode.HALF_UP));
+            double[][] train = buildFeatureMatrix(validHistory);// 构建训练集特征矩阵
+            double[] current = buildFeatures(bill);// 构建当前记录特征向量
+            IsolationForest forest = IsolationForest.fit(train);// 训练异常检测模型
+            double rawScore = forest.score(current);// 计算原始异常分数
+            double[] historyScores = forest.score(train);// 计算历史记录异常分数
+            double normalizedScore = normalizeScore(rawScore, historyScores);// 归一化异常分数
+            String anomalyType = resolveAnomalyType(bill, validHistory, normalizedScore);// 解析异常类型
+            String anomalyReason = buildReason(bill, validHistory, normalizedScore, anomalyType);// 构建异常原因
+            bill.setAnomalyScore(BigDecimal.valueOf(normalizedScore).setScale(4, RoundingMode.HALF_UP));// 设置异常分数
             if (normalizedScore >= 0.68) {
                 bill.setAnomalyType(anomalyType);
                 bill.setAnomalyReason(anomalyReason);
@@ -58,7 +58,7 @@ public class AnomalyDetectionServiceImpl implements AnomalyDetectionService {
     }
 
     /**
-     * 获取历史平均金额
+     * 清洗历史记录，只保留有效支出记录
      *
      * @param historyBills
      * @return
@@ -91,8 +91,8 @@ public class AnomalyDetectionServiceImpl implements AnomalyDetectionService {
      * @return
      */
     private double[][] buildFeatureMatrix(List<Bills> historyBills) {
-        double[][] matrix = new double[historyBills.size()][];
-        for (int i = 0; i < historyBills.size(); i++) {
+        double[][] matrix = new double[historyBills.size()][];// 特征矩阵
+        for (int i = 0; i < historyBills.size(); i++) { // 遍历历史记录
             matrix[i] = buildFeatures(historyBills.get(i));
         }
         return matrix;

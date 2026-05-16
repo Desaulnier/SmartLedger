@@ -62,4 +62,11 @@ public class CategoryRules implements Serializable {
     @Schema(defaultValue = "创建时间")
     @TableField("created_at")
     private LocalDateTime createdAt;
+
+    /**
+     * 规则优先级
+     */
+    @TableField("priority")
+    @Schema(defaultValue = "规则优先级")
+    private Integer priority;
 }

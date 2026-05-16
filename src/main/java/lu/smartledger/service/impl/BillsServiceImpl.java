@@ -74,7 +74,7 @@ public class BillsServiceImpl extends ServiceImpl<BillsMapper, Bills> implements
             throw new RuntimeException("Category not found");
         }
         if (billType == null || category.getType() == null || !billType.equalsIgnoreCase(category.getType())) {
-            throw new RuntimeException("璐﹀崟绫诲瀷涓庡垎绫荤被鍨嬩笉鍖归厤");
+            throw new RuntimeException("账单类型与分类类型不匹配");
         }
     }
 
@@ -168,7 +168,7 @@ public class BillsServiceImpl extends ServiceImpl<BillsMapper, Bills> implements
                     new LambdaQueryWrapper<Users>().eq(Users::getEmail, email)
             );
             if (user == null) {
-                return JsonResponse.fail("褰撳墠鐧诲綍鐢ㄦ埛涓嶅瓨鍦紝鏃犳硶瀵煎叆璐﹀崟");
+                return JsonResponse.fail("当前登录用户不存在，无法导入账单");
             }
 
             BillImportRecords record = new BillImportRecords();
@@ -195,13 +195,13 @@ public class BillsServiceImpl extends ServiceImpl<BillsMapper, Bills> implements
     @Transactional(rollbackFor = Exception.class)
     public void confirmImport(Long importRecordId, List<Map<String, Object>> billList, Long userId) {
         if (importRecordId == null) {
-            throw new RuntimeException("瀵煎叆璁板綍ID涓嶈兘涓虹┖");
+            throw new RuntimeException("导入记录ID不能为空");
         }
         if (userId == null) {
             throw new RuntimeException("User not logged in");
         }
         if (billList == null || billList.isEmpty()) {
-            throw new RuntimeException("娌℃湁鍙鍏ョ殑璐﹀崟鏁版嵁");
+            throw new RuntimeException("没有可导入的账单数据");
         }
 
         BillImportRecords record = importRecordsService.getById(importRecordId);
@@ -220,7 +220,7 @@ public class BillsServiceImpl extends ServiceImpl<BillsMapper, Bills> implements
             importAccountName = "Alipay import account";
         } else if ("excel".equalsIgnoreCase(record.getFileType())) {
             importAccountType = (byte) 4;
-            importAccountName = "寰俊璐︽埛";
+            importAccountName = "微信账户";
         }
 
 
@@ -315,7 +315,7 @@ public class BillsServiceImpl extends ServiceImpl<BillsMapper, Bills> implements
                 historyBills.add(bill);
             }
             else {
-                bill.setIsAbnormal(false);//榛樿姝ｅ父
+                bill.setIsAbnormal(false);//默认正常
             }
             bills.add(bill);
             mergeAccountBalanceDelta(accountBalanceDeltaMap, accountId, billType, amount);
@@ -326,7 +326,7 @@ public class BillsServiceImpl extends ServiceImpl<BillsMapper, Bills> implements
         }
 
         if (bills.isEmpty()) {
-            throw new RuntimeException("娌℃湁绗﹀悎瑕佹眰鐨勮处鍗曞彲瀵煎叆");
+            throw new RuntimeException("没有成功解析的账单数据");
         }
 
         saveBatch(bills);
@@ -351,23 +351,23 @@ public class BillsServiceImpl extends ServiceImpl<BillsMapper, Bills> implements
 
     // Time parsing helper
     private LocalDateTime parseOccurTime(Map<String, Object> map, LocalDateTime defaultTime) {
-        // 鍏堣瘯occurTime
+        // 尝试解析occurTime
         Object occurTimeObj = map.get("occurTime");
         if (occurTimeObj != null && !occurTimeObj.toString().isBlank()) {
             try {
                 return LocalDateTime.parse(occurTimeObj.toString());
             } catch (Exception e) {
-                // 鏍煎紡閿欒锛岀户缁瘯billDate
+                // 格式错误，尝试解析billDate
             }
         }
 
-        // 鍐嶈瘯billDate
+        // 尝试解析billDate
         Object billDateObj = map.get("billDate");
         if (billDateObj != null && !billDateObj.toString().isBlank()) {
             try {
                 return LocalDateTime.parse(billDateObj.toString() + "T00:00:00");
             } catch (Exception e) {
-                // 鏍煎紡閿欒锛岀敤榛樿鏃堕棿
+                // 格式错误，使用默认时间
             }
         }
 
@@ -377,19 +377,19 @@ public class BillsServiceImpl extends ServiceImpl<BillsMapper, Bills> implements
     @Transactional(rollbackFor = Exception.class)
     public void saveBills(Bills bill, Long userId) {
         if (bill == null) {
-            throw new RuntimeException("璐﹀崟鏁版嵁涓嶈兘涓虹┖");
+            throw new RuntimeException("账单数据不能为空");
         }
 
         if (bill.getAmount() == null || bill.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new RuntimeException("璐﹀崟閲戦蹇呴』澶т簬0");
+            throw new RuntimeException("账单金额必须大于0");
         }
 
         if (bill.getBillType() == null || (!"EXPENSE".equals(bill.getBillType()) && !"INCOME".equals(bill.getBillType()))) {
-            throw new RuntimeException("璐﹀崟绫诲瀷蹇呴』鏄疎XPENSE鎴朓NCOME");
+            throw new RuntimeException("账单类型必须是EXPENSE或INCOME");
         }
 
         if (bill.getCategoryId() == null) {
-            throw new RuntimeException("璐﹀崟鍒嗙被涓嶈兘涓虹┖");
+            throw new RuntimeException("账单分类不能为空");
         }
         validateCategoryMatch(bill.getCategoryId(), bill.getBillType());
 
@@ -398,7 +398,7 @@ public class BillsServiceImpl extends ServiceImpl<BillsMapper, Bills> implements
         bill.setCreatedAt(LocalDateTime.now());
         bill.setUpdatedAt(LocalDateTime.now());
 
-        // 鑾峰彇褰撳墠璐︽埛
+        // 获取当前账户
         Accounts currentAccount = getCurrentOrDefaultAccount(userId);
         bill.setAccountId(currentAccount.getId());
         if (bill.getConsumptionAttribute() == null && bill.getBillType() == "EXPENSE") {
@@ -446,7 +446,7 @@ public class BillsServiceImpl extends ServiceImpl<BillsMapper, Bills> implements
 
     @Override
     public Page<Bills> getUserBillList(Long userId, Integer pageNum, Integer pageSize, String type, String category, String startDate, String endDate, String keyword) {
-        // 闃叉鍒嗛〉鍙傛暟涓簄ull
+        // 防止分页参数为null
         pageNum = pageNum == null ? 1 : pageNum;
         pageSize = pageSize == null ? 10 : pageSize;
 
@@ -564,7 +564,7 @@ public class BillsServiceImpl extends ServiceImpl<BillsMapper, Bills> implements
     @Transactional(rollbackFor = Exception.class)
     public void deleteBills(Long billId, Long userId) {
         if (billId == null) {
-            throw new RuntimeException("璐﹀崟ID涓嶈兘涓虹┖");
+            throw new RuntimeException("账单ID不能为空");
         }
         Bills bill = this.getById(billId);
         if (bill == null) {
@@ -582,7 +582,7 @@ public class BillsServiceImpl extends ServiceImpl<BillsMapper, Bills> implements
     }
 
     /**
-     * 鏇存柊璐﹀崟
+     * 更新账单
      *
      * @param bill
      * @param userId
@@ -591,19 +591,19 @@ public class BillsServiceImpl extends ServiceImpl<BillsMapper, Bills> implements
     @Transactional(rollbackFor = Exception.class)
     public void updateBill(Bills bill, Long userId) {
         if (bill == null || bill.getId() == null) {
-            throw new RuntimeException("璐﹀崟ID涓嶈兘涓虹┖");
+            throw new RuntimeException("账单ID不能为空");
         }
         if (userId == null) {
             throw new RuntimeException("User not logged in");
         }
         if (bill.getAmount() == null || bill.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new RuntimeException("璐﹀崟閲戦蹇呴』澶т簬0");
+            throw new RuntimeException("账单金额必须大于0");
         }
         if (bill.getBillType() == null || (!"EXPENSE".equals(bill.getBillType()) && !"INCOME".equals(bill.getBillType()))) {
-            throw new RuntimeException("璐﹀崟绫诲瀷蹇呴』鏄疎XPENSE鎴朓NCOME");
+            throw new RuntimeException("账单类型必须是EXPENSE或INCOME");
         }
         if (bill.getCategoryId() == null) {
-            throw new RuntimeException("鍒嗙被涓嶈兘涓虹┖");
+            throw new RuntimeException("分类不能为空");
         }
 
         validateCategoryMatch(bill.getCategoryId(), bill.getBillType());
@@ -613,7 +613,7 @@ public class BillsServiceImpl extends ServiceImpl<BillsMapper, Bills> implements
             throw new RuntimeException("Bill not found");
         }
         if (!userId.equals(oldBill.getUserId())) {
-            throw new RuntimeException("鏃犳潈缂栬緫浠栦汉璐﹀崟");
+            throw new RuntimeException("无权编辑他人账单");
         }
 
         BigDecimal oldExpense = "EXPENSE".equals(oldBill.getBillType()) ? oldBill.getAmount() : BigDecimal.ZERO;
@@ -832,9 +832,9 @@ if (suggestions.isEmpty()) {
     /**
      * Get daily spending trend for the specified month
      *
-     * @param userId   鐢ㄦ埛ID
-     * @param monthStr 鏈堜唤瀛楃涓诧紝鏍煎紡涓簓yyy-MM
-     * @return 娑堣垂瓒嬪娍鏁版嵁鍒楄〃
+     * @param userId   用户ID
+     * @param monthStr 月份字符串，格式为yyyy-MM
+     * @return 消费趋势数据列表
      */
     @Override
     public List<Map<String, Object>> getDailyTrend(Long userId, String monthStr) {
@@ -908,7 +908,7 @@ if (suggestions.isEmpty()) {
         if (defaultAccount == null) {
             defaultAccount = new Accounts();
             defaultAccount.setUserId(userId);
-            defaultAccount.setAccountName("榛樿璐︽埛");
+            defaultAccount.setAccountName("默认账户");
             defaultAccount.setAccountType((byte) 5);
             defaultAccount.setBalance(BigDecimal.ZERO);
             defaultAccount.setIsDefault((byte) 1);
@@ -927,31 +927,49 @@ if (suggestions.isEmpty()) {
         return defaultAccount;
     }
 
+    /**
+     * 自动分类账单
+     *
+     * @param billsList 账单列表
+     */
     private void autoClassify(List<Bills> billsList) {
+        // 获取所有启用的分类规则
         List<CategoryRules> rules = categoryRulesService.lambdaQuery()
                 .eq(CategoryRules::getIsEnabled, true)
+                .orderByDesc(CategoryRules::getPriority)
                 .list();
-
-        if (rules.isEmpty()) {
+        // 如果没有规则或者账单列表为空，则返回
+        if (rules == null || rules.isEmpty() || billsList == null || billsList.isEmpty()) {
             return;
         }
-
+        // 获取所有分类ID
         Set<Long> categoryIds = new HashSet<>();
         for (CategoryRules rule : rules) {
             if (rule.getCategoryId() != null) {
                 categoryIds.add(rule.getCategoryId());
             }
         }
-
+        // 获取所有分类
         Map<Long, Categories> categoryMap = categoryIds.isEmpty()
                 ? Collections.emptyMap()
                 : categoriesMapper.selectBatchIds(categoryIds).stream()
                 .collect(Collectors.toMap(Categories::getId, c -> c));
 
         for (Bills bill : billsList) {
+            if (bill == null) {
+                continue;
+            }
+            // 处理账单
             String remark = bill.getRemark() == null ? "" : bill.getRemark();
             String cleanedRemark = cleanRemark(remark).toLowerCase();
             String billType = bill.getBillType();
+
+            if (cleanedRemark.isEmpty() || billType == null || billType.isBlank()) {
+                continue;
+            }
+            // 初始化分数和命中次数
+            Map<Long, BigDecimal> scoreMap = new HashMap<>();
+            Map<Long, Integer> hitCountMap = new HashMap<>();
 
             for (CategoryRules rule : rules) {
                 if (rule.getCategoryId() == null || rule.getKeyword() == null) {
@@ -963,16 +981,53 @@ if (suggestions.isEmpty()) {
                     continue;
                 }
 
-                if (billType == null || !billType.equalsIgnoreCase(category.getType())) {
+                if (!billType.equalsIgnoreCase(category.getType())) {
                     continue;
                 }
 
                 String keyword = rule.getKeyword().trim().toLowerCase();
-                if (!keyword.isEmpty() && cleanedRemark.contains(keyword)) {
-                    bill.setCategoryId(rule.getCategoryId());
-                    bill.setConsumptionAttribute(resolveConsumptionAttribute(rule.getCategoryId()));
-                    break;
+                if (keyword.isEmpty()) {
+                    continue;
                 }
+                // 计算得分
+                if (cleanedRemark.contains(keyword)) {
+                    BigDecimal weight = BigDecimal.ONE;
+                    BigDecimal priority = rule.getPriority() == null
+                            ? BigDecimal.ONE
+                            : BigDecimal.valueOf(rule.getPriority());
+
+                    BigDecimal score = weight.multiply(priority);
+
+                    scoreMap.merge(rule.getCategoryId(), score, BigDecimal::add);
+                    hitCountMap.merge(rule.getCategoryId(), 1, Integer::sum);
+                }
+            }
+
+            if (scoreMap.isEmpty()) {
+                continue;
+            }
+
+            Long bestCategoryId = null;
+            BigDecimal bestScore = BigDecimal.valueOf(-1);
+            int bestHitCount = -1;
+
+            for (Map.Entry<Long, BigDecimal> entry : scoreMap.entrySet()) {
+                Long categoryId = entry.getKey();
+                BigDecimal score = entry.getValue();
+                int hitCount = hitCountMap.getOrDefault(categoryId, 0);
+
+                if (bestCategoryId == null
+                        || score.compareTo(bestScore) > 0
+                        || (score.compareTo(bestScore) == 0 && hitCount > bestHitCount)) {
+                    bestCategoryId = categoryId;
+                    bestScore = score;
+                    bestHitCount = hitCount;
+                }
+            }
+
+            if (bestCategoryId != null) {
+                bill.setCategoryId(bestCategoryId);
+                bill.setConsumptionAttribute(resolveConsumptionAttribute(bestCategoryId));
             }
         }
     }
@@ -1076,17 +1131,17 @@ if (suggestions.isEmpty()) {
         cleaned = cleaned.replaceAll("\\u3010.*?\\u3011", "");
         cleaned = cleaned.replaceAll("_.*", "");
         cleaned = cleaned.replaceAll("\\u6536\\u6B3E\\u65B9\\u5907\\u6CE8:", "");
-        cleaned = cleaned.replaceAll("杞处澶囨敞:", "");
-        cleaned = cleaned.replaceAll("鍟嗘埛鍗曞彿.*", "");
+        cleaned = cleaned.replaceAll("转账备注:", "");
+        cleaned = cleaned.replaceAll("商户单号.*", "");
         cleaned = cleaned.replaceAll("/$", "");
-        cleaned = cleaned.replaceAll("鏀粯$", "");
-        cleaned = cleaned.replaceAll("-鏀粯$", "");
+        cleaned = cleaned.replaceAll("收$", "");
+        cleaned = cleaned.replaceAll("-支付$", "");
         cleaned = cleaned.replaceAll("\\s+", "");
 
         return cleaned.trim();
     }
 
-    // 寰俊瑙ｆ瀽锛堜笉鍙橈級
+    // 微信账单
     private List<Bills> parseWechatExcel(MultipartFile file) throws Exception {
         List<WechatBill> wechatBills = new ArrayList<>();
 
@@ -1128,12 +1183,7 @@ if (suggestions.isEmpty()) {
     }
 
     /**
-     * 灏濊瘯瑙ｆ瀽鏀粯瀹滳SV鏂囦欢
-     *
-     * @param file      CSV鏂囦欢
-     * @param charset   鏂囦欢缂栫爜
-     * @return 瑙ｆ瀽鍚庣殑璐﹀崟鍒楄〃
-     * @throws Exception 瑙ｆ瀽寮傚父
+     * Parse Alipay CSV line
      */
     private List<Bills> tryParseAlipayCsv(MultipartFile file, Charset charset) throws Exception {
         List<Bills> billsList = new ArrayList<>();
@@ -1243,9 +1293,8 @@ if (suggestions.isEmpty()) {
                     .last("limit 1")
     );
 }
-
 /**
- * 鑾峰彇鎴栧垱寤哄鍏ヨ处鍗曠殑璐︽埛
+ * Get or create import account
  */
 private Accounts getOrCreateImportAccount(Long userId, Byte accountType, String accountName) {
     Accounts account = findUserAccountByType(userId, accountType);

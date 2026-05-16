@@ -9,6 +9,7 @@
         <result column="keyword" property="keyword" />
         <result column="is_enabled" property="isEnabled" />
         <result column="created_at" property="createdAt" />
+        <result column="priority" property="priority"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
